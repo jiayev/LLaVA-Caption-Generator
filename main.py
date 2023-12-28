@@ -17,6 +17,8 @@ from run_llava import eval_model
 # 保存模型路径的文件
 SAVED_MODEL_PATH_FILE = "model_path.txt"
 
+stop_batch_processing = False
+
 # 读取保存的模型路径
 def read_saved_model_path():
     with open('model_path.txt', 'r') as file:
@@ -111,6 +113,10 @@ def prepare(image, process_type, input_dir, output_dir, save_csv, save_txt, prom
         progress_bar = tqdm(total=len(image_files), desc='Processing Images', unit='img')
 
         for image_filename in image_files:
+            global stop_batch_processing
+            if stop_batch_processing:
+                stop_batch_processing = False
+                return "Batch processing is stopped."
             image = Image.open(f"{input_dir}/{image_filename}")
             print(f"Processing {image_filename}")
             caption = gen_caption(image, prompt, temperature, top_p, num_beams)
@@ -122,13 +128,15 @@ def prepare(image, process_type, input_dir, output_dir, save_csv, save_txt, prom
             
             # Update the progress bar
             progress_bar.update(1)
-
         # Close the progress bar
         progress_bar.close()
         
         return f"Processed {len(image_files)} images!"
     
-                
+# A function to stop the batch processing
+def stop_batch():
+    global stop_batch_processing
+    stop_batch_processing = True
 
 # Define a separate function for single image processing
 def prepare_single_image(input_image, temperature, top_p, num_beams, prompt):
@@ -168,6 +176,8 @@ def gui():
                 output_text_batch = gr.Textbox(label="Batch Process Status", lines=10, placeholder="Batch processing status will appear here...")
                 batch_process_btn = gr.Button("Process Batch", variant="primary")
                 batch_process_btn.click(prepare_batch, inputs=[input_dir, output_dir, save_csv, save_txt, prompt, temperature, top_p, num_beams], outputs=output_text_batch)
+                stop_process_btn = gr.Button("Stop Processing", variant="secondary")
+                stop_process_btn.click(stop_batch, inputs=[], outputs=[])
 
         # Removed the Accordion block because there's no longer a switch between beam search and nucleus sampling
     return demo
