@@ -14,8 +14,12 @@ def load_model(model_path, arg=None):
     global model, tokenizer, image_processor, context_len
     print(f"Loading LLaVa model...It takes time.")
     if arg is not None:
-        arg_8bit = arg.get("8bit", False)
-        arg_4bit = arg.get("4bit", False)
+        # arg is a str. arg_8bit and arg_4bit is bool.
+        arg_8bit = "8bit" in arg
+        arg_4bit = "4bit" in arg
+    else:
+        arg_8bit = False
+        arg_4bit = False
     tokenizer, model, image_processor, context_len = load_pretrained_model(
         model_path=model_path,
         model_base=None,

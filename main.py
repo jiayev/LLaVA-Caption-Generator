@@ -17,23 +17,19 @@ from run_llava import eval_model
 # 保存模型路径的文件
 SAVED_MODEL_PATH_FILE = "model_path.txt"
 
-model_path = ""
-
 # 读取保存的模型路径
 def read_saved_model_path():
-    global model_path
-
     with open('model_path.txt', 'r') as file:
         lines = file.readlines()
         directory = lines[0].strip()  # Read the directory and remove any trailing newlines/spaces
-        model_path = directory  # set the global variable
-
         # Check if there is a second line with parameters
         parameter = lines[1].strip() if len(lines) > 1 else None
 
     return directory, parameter
 
-load_model(read_saved_model_path())
+model_path, parameter = read_saved_model_path()
+
+load_model(model_path, parameter)
 
 # Function definitions remain the same
 def get_device():
@@ -136,12 +132,12 @@ def prepare(image, process_type, input_dir, output_dir, save_csv, save_txt, prom
 
 # Define a separate function for single image processing
 def prepare_single_image(input_image, temperature, top_p, num_beams, prompt):
-    return prepare(input_image, "Single Image", None, None, None, False, False,
+    return prepare(input_image, "Single Image", None, None, False, False,
                    prompt, temperature, top_p, num_beams)
 
 # and another for batch processing
-def prepare_batch(input_dir, output_dir, extension, save_csv, save_txt, prompt, temperature, top_p, num_beams):
-    return prepare(None, "Batch Process", input_dir, output_dir, extension, save_csv, save_txt,
+def prepare_batch(input_dir, output_dir, save_csv, save_txt, prompt, temperature, top_p, num_beams):
+    return prepare(None, "Batch Process", input_dir, output_dir, save_csv, save_txt,
                    prompt, temperature, top_p, num_beams)
 
 # Main Gradio interface
