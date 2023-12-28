@@ -10,15 +10,20 @@ def get_device():
     else:
         return "cpu"
     
-def load_model(model_path):
+def load_model(model_path, arg=None):
     global model, tokenizer, image_processor, context_len
     print(f"Loading LLaVa model...It takes time.")
+    if arg is not None:
+        arg_8bit = arg.get("8bit", False)
+        arg_4bit = arg.get("4bit", False)
     tokenizer, model, image_processor, context_len = load_pretrained_model(
         model_path=model_path,
         model_base=None,
-        model_name=get_model_name_from_path(model_path)
+        model_name=get_model_name_from_path(model_path),
+        load_8bit=arg_8bit,
+        load_4bit=arg_4bit
     )
-    model.to(get_device())  # Move the model to the appropriate device
+    #model.to(get_device())  # Move the model to the appropriate device
     print("Finish loading LLaVa model!")
     if model is not None:
         print("Model loaded successfully")

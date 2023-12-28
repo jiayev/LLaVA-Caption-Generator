@@ -16,17 +16,23 @@ from run_llava import eval_model
 # 保存模型路径的文件
 SAVED_MODEL_PATH_FILE = "model_path.txt"
 
+model_path = ""
+
 # 读取保存的模型路径
 def read_saved_model_path():
-    if Path(SAVED_MODEL_PATH_FILE).is_file():
-        with open(SAVED_MODEL_PATH_FILE, 'r') as file:
-            return file.read().strip()
-    return ""
+    global model_path
 
-# model_path = "/media/jiaye/DATA/lyj/codes/llm/LLaVA/models/llava-v1.5-7b"  # Example path
-model_path = read_saved_model_path()
+    with open('model_path.txt', 'r') as file:
+        lines = file.readlines()
+        directory = lines[0].strip()  # Read the directory and remove any trailing newlines/spaces
+        model_path = directory  # set the global variable
 
-load_model(model_path)
+        # Check if there is a second line with parameters
+        parameter = lines[1].strip() if len(lines) > 1 else None
+
+    return directory, parameter
+
+load_model(read_saved_model_path())
 
 # Function definitions remain the same
 def get_device():
