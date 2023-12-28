@@ -150,7 +150,7 @@ def prepare_batch(input_dir, output_dir, save_csv, save_txt, prompt, temperature
 
 # Main Gradio interface
 def gui():
-    with gr.Blocks() as demo:
+    with gr.Blocks(title="LLaVa Caption Generator") as demo:
         gr.Markdown("# LLaVa Caption Generator")
 
         with gr.Tabs() as tabs:
