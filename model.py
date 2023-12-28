@@ -20,6 +20,10 @@ def load_model(model_path, arg=None):
     else:
         arg_8bit = False
         arg_4bit = False
+    if arg_4bit:
+        print("Loading 4-bit quantized model.")
+    elif arg_8bit:
+        print("Loading 8-bit quantized model.")
     tokenizer, model, image_processor, context_len = load_pretrained_model(
         model_path=model_path,
         model_base=None,
