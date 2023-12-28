@@ -25,6 +25,11 @@ from PIL import Image
 from io import BytesIO
 import re
 
+import warnings
+
+# Place this code before the code that generates the warning
+warnings.filterwarnings('ignore', message="Using `max_length`'s default")
+
 
 def image_parser(args):
     out = args.image_file.split(args.sep)
