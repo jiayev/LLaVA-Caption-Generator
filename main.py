@@ -7,6 +7,7 @@ import requests
 from PIL import Image
 import torch
 import gradio as gr
+from tqdm import tqdm
 from llava.model.builder import load_pretrained_model
 from llava.mm_utils import get_model_name_from_path
 from model import context_len, load_model, unload_model
@@ -93,7 +94,7 @@ def save_txt_f(caption, output_dir, image_filename):
         
         
 
-def prepare(image, process_type, input_dir, output_dir, extension, save_csv, save_txt, prompt, temperature, top_p, num_beams):
+def prepare(image, process_type, input_dir, output_dir, save_csv, save_txt, prompt, temperature, top_p, num_beams):
     if process_type == "Single Image":
         return gen_caption(image, prompt, temperature, top_p, num_beams)
     elif process_type == "Batch Process":
@@ -104,20 +105,32 @@ def prepare(image, process_type, input_dir, output_dir, extension, save_csv, sav
             return "Input directory does not exist"
         if not output_dir_path.is_dir():
             output_dir_path.mkdir(parents=True, exist_ok=True)
-        count = 0
-        for image_filename in os.listdir(input_dir):
-            if image_filename.endswith(('.jpg', '.jpeg', '.png')):
-                image = Image.open(f"{input_dir}/{image_filename}")
-                print(f"Processing {image_filename}")
-                count += 1
-                caption = gen_caption(image, prompt, temperature, top_p, num_beams)
-                if save_csv:
-                    save_csv_f(caption, output_dir, image_filename)
-                if save_txt:
-                    save_txt_f(caption, output_dir, image_filename)
-                image.close()
+        
+        # Get a list of images
+        image_files = [
+            f for f in os.listdir(input_dir) if f.endswith(('.jpg', '.jpeg', '.png'))
+        ]
+        
+        # Initialize tqdm progress bar
+        progress_bar = tqdm(total=len(image_files), desc='Processing Images', unit='img')
 
-        return f"Processed {count} images!"
+        for image_filename in image_files:
+            image = Image.open(f"{input_dir}/{image_filename}")
+            print(f"Processing {image_filename}")
+            caption = gen_caption(image, prompt, temperature, top_p, num_beams)
+            if save_csv:
+                save_csv_f(caption, output_dir, image_filename)
+            if save_txt:
+                save_txt_f(caption, output_dir, image_filename)
+            image.close()
+            
+            # Update the progress bar
+            progress_bar.update(1)
+
+        # Close the progress bar
+        progress_bar.close()
+        
+        return f"Processed {len(image_files)} images!"
     
                 
 
@@ -150,7 +163,6 @@ def gui():
             with gr.TabItem("Batch Process"):
                 input_dir = gr.Textbox(label="Input Directory", placeholder="Enter the directory path...")
                 output_dir = gr.Textbox(label="Output Directory", placeholder="Enter the output directory path...")
-                extension = gr.Textbox(label="File Extensions", value=".png, .jpg")
                 save_csv = gr.Checkbox(label="Save as CSV", value=True)
                 save_txt = gr.Checkbox(label="Save as TXT", value=False)
                 temperature = gr.Slider(minimum=0.1, maximum=2.0, value=1.0, label="Temperature")
@@ -159,7 +171,7 @@ def gui():
                 prompt = gr.Textbox(label="Prompt", placeholder="Enter your description prompt here.")
                 output_text_batch = gr.Textbox(label="Batch Process Status", lines=10, placeholder="Batch processing status will appear here...")
                 batch_process_btn = gr.Button("Process Batch", variant="primary")
-                batch_process_btn.click(prepare_batch, inputs=[input_dir, output_dir, extension, save_csv, save_txt, prompt, temperature, top_p, num_beams], outputs=output_text_batch)
+                batch_process_btn.click(prepare_batch, inputs=[input_dir, output_dir, save_csv, save_txt, prompt, temperature, top_p, num_beams], outputs=output_text_batch)
 
         # Removed the Accordion block because there's no longer a switch between beam search and nucleus sampling
     return demo
