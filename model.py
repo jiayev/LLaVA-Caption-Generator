@@ -3,6 +3,7 @@ from llava.mm_utils import get_model_name_from_path
 import torch
 
 model, tokenizer, image_processor, context_len = None, None, None, None
+model_loaded = False
 
 def get_device():
     if torch.cuda.is_available():
@@ -11,7 +12,7 @@ def get_device():
         return "cpu"
     
 def load_model(model_path, arg=None):
-    global model, tokenizer, image_processor, context_len
+    global model, tokenizer, image_processor, context_len, model_loaded
     print(f"Loading LLaVa model...It takes time.")
     if arg is not None:
         # arg is a str. arg_8bit and arg_4bit is bool.
@@ -36,16 +37,21 @@ def load_model(model_path, arg=None):
     if model is not None:
         print("Model loaded successfully")
         print(f'Model loaded at id: {id(model)}')
+        model_loaded = True
     else:
         print("Failed to load the model")
 
 def unload_model():
-    global model, tokenizer, image_processor, context_len
-    print("Unloading model")
-    del model
-    del tokenizer
-    del image_processor
-    del context_len
-    torch.cuda.empty_cache()
-    model, tokenizer, image_processor, context_len = None, None, None, None
-    print("Finish!")
+    global model, tokenizer, image_processor, context_len, model_loaded
+    if model_loaded:
+        print("Unloading model")
+        del model
+        del tokenizer
+        del image_processor
+        del context_len
+        torch.cuda.empty_cache()
+        model, tokenizer, image_processor, context_len = None, None, None, None
+        model_loaded = False
+        print("Model unloaded successfully")
+    else:
+        print("Model is not loaded")

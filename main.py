@@ -10,28 +10,32 @@ import gradio as gr
 from tqdm import tqdm
 from llava.model.builder import load_pretrained_model
 from llava.mm_utils import get_model_name_from_path
-from model import context_len, load_model, unload_model
+from model import context_len, load_model, unload_model, model_loaded
 from run_llava import eval_model
 
 # Set the model-related global variables
 # 保存模型路径的文件
 SAVED_MODEL_PATH_FILE = "model_path.txt"
-
 stop_batch_processing = False
 
-# 读取保存的模型路径
+# Read saved model path
 def read_saved_model_path():
     with open('model_path.txt', 'r') as file:
         lines = file.readlines()
         directory = lines[0].strip()  # Read the directory and remove any trailing newlines/spaces
-        # Check if there is a second line with parameters
-        parameter = lines[1].strip() if len(lines) > 1 else None
+    return directory
 
-    return directory, parameter
+model_path = read_saved_model_path()
 
-model_path, parameter = read_saved_model_path()
+# overwrite if exist
+def save_model_path(directory):
+    with open('model_path.txt', 'w') as file:
+        file.write(directory)
+    read_saved_model_path()
+    global model_path
+    print(f"Saved as path {model_path}.")
 
-load_model(model_path, parameter)
+# load_model(model_path, parameter)
 
 # Function definitions remain the same
 def get_device():
@@ -151,8 +155,18 @@ def prepare_batch(input_dir, output_dir, save_csv, save_txt, prompt, temperature
 # Main Gradio interface
 def gui():
     with gr.Blocks(title="LLaVa Caption Generator") as demo:
+        global model_path, parameter
         gr.Markdown("# LLaVa Caption Generator")
-
+        with gr.Row():
+            with gr.Row():
+                load_model_button = gr.Button("Load Model")
+                unload_model_button = gr.Button("Unload Model")
+                save_model_path_button = gr.Button("Save Model Path")
+            model_path_input = gr.Textbox(label="Model Path", value=model_path)
+            save_model_path_button.click(save_model_path, inputs=model_path_input, outputs=None)
+            quantization_dropdown = gr.Dropdown(choices=["", "8bit", "4bit"], label="Quantization")
+            load_model_button.click(load_model, inputs=[model_path_input, quantization_dropdown], outputs=None)
+            unload_model_button.click(unload_model, inputs=None, outputs=None)
         with gr.Tabs() as tabs:
             with gr.TabItem("Single Image"):
                 input_image = gr.Image(label="Image", type='pil')
