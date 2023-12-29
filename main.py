@@ -97,6 +97,9 @@ def save_txt_f(caption, output_dir, image_filename):
         
 
 def prepare(image, process_type, input_dir, output_dir, save_csv, save_txt, prompt, temperature, top_p, num_beams):
+    global model_loaded
+    if not model_loaded:
+        return "Model not loaded."
     if process_type == "Single Image":
         return gen_caption(image, prompt, temperature, top_p, num_beams)
     elif process_type == "Batch Process":
