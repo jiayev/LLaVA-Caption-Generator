@@ -10,7 +10,7 @@ import gradio as gr
 from tqdm import tqdm
 from llava.model.builder import load_pretrained_model
 from llava.mm_utils import get_model_name_from_path
-from model import context_len, load_model, unload_model, model_loaded
+from model import context_len, load_model, unload_model
 from run_llava import eval_model
 
 # Set the model-related global variables
@@ -97,7 +97,7 @@ def save_txt_f(caption, output_dir, image_filename):
         
 
 def prepare(image, process_type, input_dir, output_dir, save_csv, save_txt, prompt, temperature, top_p, num_beams):
-    global model_loaded
+    from model import model_loaded
     if not model_loaded:
         return "Model not loaded."
     if process_type == "Single Image":

@@ -1,6 +1,7 @@
 from llava.model.builder import load_pretrained_model
 from llava.mm_utils import get_model_name_from_path
 import torch
+import gc
 
 model, tokenizer, image_processor, context_len = None, None, None, None
 model_loaded = False
@@ -49,6 +50,7 @@ def unload_model():
         del tokenizer
         del image_processor
         del context_len
+        gc.collect()
         torch.cuda.empty_cache()
         model, tokenizer, image_processor, context_len = None, None, None, None
         model_loaded = False
