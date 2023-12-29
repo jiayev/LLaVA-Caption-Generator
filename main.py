@@ -126,6 +126,7 @@ def prepare(image, process_type, input_dir, output_dir, save_csv, save_txt, prom
                 return "Batch processing is stopped."
             image = Image.open(f"{input_dir}/{image_filename}")
             print(f"Processing {image_filename}")
+            print("Caption:")
             caption = gen_caption(image, prompt, temperature, top_p, num_beams)
             if save_csv:
                 save_csv_f(caption, output_dir, image_filename)
@@ -144,9 +145,11 @@ def prepare(image, process_type, input_dir, output_dir, save_csv, save_txt, prom
 def stop_batch():
     global stop_batch_processing
     stop_batch_processing = True
+    print("Batch processing stopped.")
 
 # Define a separate function for single image processing
 def prepare_single_image(input_image, temperature, top_p, num_beams, prompt):
+    print(f"Processing {input_image}")
     return prepare(input_image, "Single Image", None, None, False, False,
                    prompt, temperature, top_p, num_beams)
 
