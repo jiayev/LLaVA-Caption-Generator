@@ -57,10 +57,6 @@ def eval_model(args):
     # Model
     # disable_torch_init()
     from model import model, tokenizer, image_processor
-    if model is None:
-        print("Model is None")
-    else:
-        print(f'Model used at id: {id(model)}')
 
     model_name = get_model_name_from_path(args.model_path)
 

@@ -37,7 +37,6 @@ def load_model(model_path, arg=None):
     print("Finish loading LLaVa model!")
     if model is not None:
         print("Model loaded successfully")
-        print(f'Model loaded at id: {id(model)}')
         model_loaded = True
     else:
         print("Failed to load the model")
